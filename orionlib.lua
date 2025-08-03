@@ -1549,3 +1549,492 @@ RunService.Heartbeat:Connect(function()
 		getgenv().YoxanX_Notify("🔄 Switching Target...")
 	end
 end)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+
+-- Create Overlay Texts
+local ui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+ui.Name = "YoxanX_OverlayUI"
+ui.ResetOnSpawn = false
+
+local healthTag = Instance.new("TextLabel", ui)
+healthTag.Position = UDim2.new(0.5, -100, 0.05, 0)
+healthTag.Size = UDim2.new(0, 200, 0, 25)
+healthTag.BackgroundTransparency = 1
+healthTag.TextColor3 = Color3.fromRGB(255, 80, 80)
+healthTag.Text = ""
+healthTag.Font = Enum.Font.GothamBold
+healthTag.TextScaled = true
+healthTag.Visible = false
+
+local distTag = Instance.new("TextLabel", ui)
+distTag.Position = UDim2.new(0.5, -100, 0.08, 0)
+distTag.Size = UDim2.new(0, 200, 0, 25)
+distTag.BackgroundTransparency = 1
+distTag.TextColor3 = Color3.fromRGB(80, 255, 255)
+distTag.Text = ""
+distTag.Font = Enum.Font.GothamBold
+distTag.TextScaled = true
+distTag.Visible = false
+
+-- Crosshair Zoom Effect
+local function crossZoom(enable)
+	if enable then
+		Camera.FieldOfView = 65
+	else
+		Camera.FieldOfView = 70
+	end
+end
+
+-- Render Overlay Logic
+RunService.RenderStepped:Connect(function()
+	if not getgenv().YoxanXSettings or not getgenv().YoxanXSettings.ShowOverlay then
+		healthTag.Visible = false
+		distTag.Visible = false
+		crossZoom(false)
+		return
+	end
+
+	local target = getgenv().YoxanX_Target
+	if target and target.Character and target.Character:FindFirstChild("Humanoid") and target.Character:FindFirstChild("Head") then
+		local hum = target.Character.Humanoid
+		local dist = math.floor((target.Character.Head.Position - Camera.CFrame.Position).Magnitude)
+
+		healthTag.Text = "HP: " .. math.floor(hum.Health)
+		distTag.Text = "Distance: " .. dist .. " studs"
+		healthTag.Visible = true
+		distTag.Visible = true
+
+		if getgenv().YoxanXSettings.ZoomCrosshair then
+			crossZoom(true)
+		else
+			crossZoom(false)
+		end
+	else
+		healthTag.Visible = false
+		distTag.Visible = false
+		crossZoom(false)
+	end
+end)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+
+-- UI Rage Meter
+local rageGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+rageGui.Name = "YoxanX_RageUI"
+rageGui.ResetOnSpawn = false
+
+local rageBar = Instance.new("Frame", rageGui)
+rageBar.Position = UDim2.new(0.5, -100, 0.92, 0)
+rageBar.Size = UDim2.new(0, 200, 0, 18)
+rageBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+rageBar.BorderSizePixel = 0
+
+local fill = Instance.new("Frame", rageBar)
+fill.Size = UDim2.new(0, 0, 1, 0)
+fill.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+fill.BorderSizePixel = 0
+
+local function UpdateRage(percent)
+	percent = math.clamp(percent or 0, 0, 1)
+	fill:TweenSize(UDim2.new(percent, 0, 1, 0), "Out", "Quad", 0.2)
+end
+
+-- Track curve of target motion
+local CurveMemory = {}
+local function UpdateTargetCurve(target)
+	if not target or not target.Character or not target.Character:FindFirstChild("Head") then return end
+	local head = target.Character.Head
+	local time = tick()
+	table.insert(CurveMemory, {pos = head.Position, t = time})
+	while #CurveMemory > 10 do
+		table.remove(CurveMemory, 1)
+	end
+end
+
+local function PredictCurve()
+	if #CurveMemory < 2 then return nil end
+	local last = CurveMemory[#CurveMemory]
+	local prev = CurveMemory[#CurveMemory - 1]
+	local dt = last.t - prev.t
+	if dt == 0 then return nil end
+	local velocity = (last.pos - prev.pos) / dt
+	local futurePos = last.pos + velocity * getgenv().YoxanX_SmartDelay()
+	return futurePos
+end
+
+-- Danger priority evaluator
+local function GetMostDangerous()
+	local highest = 0
+	local selected = nil
+	for _, p in pairs(Players:GetPlayers()) do
+		if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Humanoid") and p.Character:FindFirstChild("Head") then
+			local health = p.Character.Humanoid.Health
+			local distance = (p.Character.Head.Position - Camera.CFrame.Position).Magnitude
+			local score = (100 - health) + (500 - distance) * 0.2
+			if score > highest then
+				highest = score
+				selected = p
+			end
+		end
+	end
+	return selected
+end
+
+-- Rage meter scale (auto scale with score)
+RunService.Heartbeat:Connect(function()
+	local t = getgenv().YoxanX_Target
+	if t and t.Character and t.Character:FindFirstChild("Humanoid") then
+		local h = t.Character.Humanoid
+		local maxHP = h.MaxHealth
+		local percent = 1 - (h.Health / maxHP)
+		UpdateRage(percent)
+		UpdateTargetCurve(t)
+	end
+end)
+
+-- Export PredictCurve() for part 25
+getgenv().YoxanX_CurvePrediction = PredictCurve
+getgenv().YoxanX_GetDangerTarget = GetMostDangerous
+
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Silent gun simulation
+local function FireSilent(targetPos)
+	local bulletOrigin = Camera.CFrame.Position
+	getgenv().YoxanX_BulletFX(bulletOrigin, targetPos)
+
+	-- Fire event (if the game uses remotes)
+	for _, v in pairs(ReplicatedStorage:GetDescendants()) do
+		if v:IsA("RemoteEvent") and v.Name:lower():find("fire") then
+			pcall(function()
+				v:FireServer(targetPos)
+			end)
+		end
+	end
+end
+
+-- Trigger Logic
+RunService.Heartbeat:Connect(function()
+	if not getgenv().YoxanXSettings or not getgenv().YoxanXSettings.SilentAim then return end
+
+	local target = getgenv().YoxanX_Target
+	if not target or not target.Character then return end
+	local head = target.Character:FindFirstChild("Head")
+	if not head then return end
+
+	-- Use Curve Prediction
+	local predicted = getgenv().YoxanX_CurvePrediction and getgenv().YoxanX_CurvePrediction()
+	if not predicted then predicted = head.Position end
+
+	-- Auto fire toward predicted head
+	FireSilent(predicted)
+end)
+
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Bot Strategy State
+getgenv().YoxanX_BotMode = {
+	Mode = "Aggressive", -- or "Passive"
+	LastSwitch = 0,
+	Threats = {},
+	EnemyMemory = {}
+}
+
+-- Memory for known targets
+local function RememberEnemy(player)
+	if player and player.Character and player.Character:FindFirstChild("Head") then
+		getgenv().YoxanX_BotMode.EnemyMemory[player.Name] = {
+			Position = player.Character.Head.Position,
+			Time = tick()
+		}
+	end
+end
+
+-- Switch strategy depending on danger level
+local function EvaluateMode()
+	local count = 0
+	for _, p in pairs(Players:GetPlayers()) do
+		if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
+			local dist = (p.Character.Head.Position - Camera.CFrame.Position).Magnitude
+			if dist < 60 then
+				count += 1
+			end
+		end
+	end
+
+	local now = tick()
+	if count >= 3 and getgenv().YoxanX_BotMode.Mode ~= "Passive" and now - getgenv().YoxanX_BotMode.LastSwitch > 2 then
+		getgenv().YoxanX_BotMode.Mode = "Passive"
+		getgenv().YoxanX_Notify("🛡️ Switched to Passive Mode")
+		getgenv().YoxanX_BotMode.LastSwitch = now
+	elseif count < 2 and getgenv().YoxanX_BotMode.Mode ~= "Aggressive" and now - getgenv().YoxanX_BotMode.LastSwitch > 2 then
+		getgenv().YoxanX_BotMode.Mode = "Aggressive"
+		getgenv().YoxanX_Notify("⚔️ Switched to Aggressive Mode")
+		getgenv().YoxanX_BotMode.LastSwitch = now
+	end
+end
+
+-- Background logic
+RunService.Heartbeat:Connect(function()
+	EvaluateMode()
+
+	local target = getgenv().YoxanX_Target
+	if target then RememberEnemy(target) end
+end)
+
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Camera = workspace.CurrentCamera
+
+-- Simulated recoil curve lock
+local lastHeadPos = nil
+local recoilTween = nil
+
+-- Beam smoother FX
+local function CreateSmoothBeam(startPos, endPos)
+	local beamPart = Instance.new("Part")
+	beamPart.Anchored = true
+	beamPart.CanCollide = false
+	beamPart.Transparency = 0.4
+	beamPart.Color = Color3.fromRGB(255, 80, 80)
+	beamPart.Size = Vector3.new(0.1, 0.1, (startPos - endPos).Magnitude)
+	beamPart.CFrame = CFrame.new(startPos, endPos) * CFrame.new(0, 0, -beamPart.Size.Z / 2)
+	beamPart.Material = Enum.Material.Neon
+	beamPart.Parent = workspace
+
+	game:GetService("Debris"):AddItem(beamPart, 0.3)
+end
+
+-- Exported for silent fire part
+getgenv().YoxanX_BulletFX = function(from, to)
+	CreateSmoothBeam(from, to)
+end
+
+-- Recoil Camera Smooth Lock (simulated)
+RunService.RenderStepped:Connect(function()
+	local target = getgenv().YoxanX_Target
+	if not target or not target.Character then return end
+	local head = target.Character:FindFirstChild("Head")
+	if not head then return end
+
+	local pos = head.Position
+	if lastHeadPos and (pos - lastHeadPos).Magnitude > 3 then
+		-- Simulate aim snap smooth
+		if recoilTween then recoilTween:Cancel() end
+		local cf = CFrame.lookAt(Camera.CFrame.Position, pos)
+		recoilTween = TweenService:Create(Camera, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {CFrame = cf})
+		recoilTween:Play()
+	end
+	lastHeadPos = pos
+end)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+
+-- UI Crosshair FX
+local ui = LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("YoxanX_OverlayUI") or Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+ui.Name = "YoxanX_OverlayUI"
+
+local lockIcon = Instance.new("ImageLabel", ui)
+lockIcon.Image = "rbxassetid://12171575834" -- crosshair/lock icon
+lockIcon.BackgroundTransparency = 1
+lockIcon.Size = UDim2.new(0, 40, 0, 40)
+lockIcon.Visible = false
+
+local cross = Instance.new("Frame", ui)
+cross.Position = UDim2.new(0.5, -5, 0.5, -5)
+cross.Size = UDim2.new(0, 10, 0, 10)
+cross.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+cross.BorderSizePixel = 0
+
+local function SetCrossColor(isLocked)
+	cross.BackgroundColor3 = isLocked and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(200, 200, 200)
+end
+
+-- Lock Trail Effect
+local trails = {}
+local function CreateLockTrail(pos)
+	local trail = Instance.new("Part")
+	trail.Size = Vector3.new(0.3, 0.3, 0.3)
+	trail.Shape = Enum.PartType.Ball
+	trail.Anchored = true
+	trail.CanCollide = false
+	trail.Material = Enum.Material.Neon
+	trail.Color = Color3.fromRGB(255, 60, 60)
+	trail.Position = pos
+	trail.Parent = workspace
+	game:GetService("Debris"):AddItem(trail, 0.25)
+	table.insert(trails, trail)
+end
+
+-- Aimbot Visuals Runtime
+RunService.RenderStepped:Connect(function()
+	local target = getgenv().YoxanX_Target
+	if target and target.Character and target.Character:FindFirstChild("Head") then
+		local head = target.Character.Head
+		local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
+		if onScreen then
+			lockIcon.Position = UDim2.new(0, screenPos.X - 20, 0, screenPos.Y - 40)
+			lockIcon.Visible = true
+			SetCrossColor(true)
+			CreateLockTrail(head.Position)
+		else
+			lockIcon.Visible = false
+			SetCrossColor(false)
+		end
+	else
+		lockIcon.Visible = false
+		SetCrossColor(false)
+	end
+end)
+
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- FPS + Ping Tracker
+getgenv().YoxanX_Perf = {
+    FPS = 60,
+    Ping = 0,
+    Locks = {}
+}
+
+-- Anti-Freeze Detector (detect if target freezes)
+local function IsFrozen(target)
+    if not target or not target.Character then return false end
+    local head = target.Character:FindFirstChild("Head")
+    if not head then return false end
+    local now = tick()
+    getgenv().YoxanX_Perf.LastPos = getgenv().YoxanX_Perf.LastPos or {}
+    local last = getgenv().YoxanX_Perf.LastPos[target.Name]
+    if last and (head.Position - last.Pos).Magnitude < 0.1 and now - last.Time < 0.5 then
+        return true
+    end
+    getgenv().YoxanX_Perf.LastPos[target.Name] = {Pos = head.Position, Time = now}
+    return false
+end
+
+-- Lag Compensator (adjust prediction auto)
+local function GetSmartPrediction()
+    local ping = Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+    getgenv().YoxanX_Perf.Ping = ping
+    local multiplier = math.clamp(ping / 100, 0.5, 2)
+    return 0.05 * multiplier
+end
+
+getgenv().YoxanX_SmartDelay = GetSmartPrediction
+
+-- Lock History (store lock timestamps)
+local function TrackLock(target)
+    if not target or not target.Name then return end
+    local log = getgenv().YoxanX_Perf.Locks
+    log[target.Name] = log[target.Name] or {}
+    table.insert(log[target.Name], tick())
+    if #log[target.Name] > 10 then
+        table.remove(log[target.Name], 1)
+    end
+end
+
+-- Hook into targeting logic
+RunService.Heartbeat:Connect(function()
+    local target = getgenv().YoxanX_Target
+    if target then
+        TrackLock(target)
+        if IsFrozen(target) then
+            getgenv().YoxanX_Notify("❄️ Target Freeze Detected")
+        end
+    end
+end)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Kill HUD
+local gui = LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("YoxanX_KillFeed") or Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+gui.Name = "YoxanX_KillFeed"
+
+local label = Instance.new("TextLabel", gui)
+label.Size = UDim2.new(0, 200, 0, 40)
+label.Position = UDim2.new(0.5, -100, 0.8, 0)
+label.BackgroundTransparency = 1
+label.TextScaled = true
+label.TextColor3 = Color3.fromRGB(255, 80, 80)
+label.Font = Enum.Font.GothamBold
+label.Text = ""
+label.Visible = false
+
+-- Kill Tracker
+getgenv().YoxanX_Kills = 0
+getgenv().YoxanX_DebugMode = false
+
+local function ShowKillFeed(text)
+	label.Text = text
+	label.Visible = true
+	task.delay(1.2, function() label.Visible = false end)
+end
+
+-- Connect kill detection (simulate from silent aim)
+RunService.Heartbeat:Connect(function()
+	local target = getgenv().YoxanX_Target
+	if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+		if target.Character.Humanoid.Health <= 0 then
+			getgenv().YoxanX_Kills += 1
+
+			if getgenv().YoxanX_Kills == 2 then
+				ShowKillFeed("🔪 DOUBLE KILL!")
+			elseif getgenv().YoxanX_Kills == 3 then
+				ShowKillFeed("💀 TRIPLE KILL!")
+			elseif getgenv().YoxanX_Kills >= 4 then
+				ShowKillFeed("🔥 RAMPAGE!")
+			else
+				ShowKillFeed("💥 HEADSHOT!")
+			end
+			task.delay(0.5, function() getgenv().YoxanX_Target = nil end)
+		end
+	end
+end)
+
+-- Debug Toggle
+if getgenv().YoxanXSettings then
+	getgenv().YoxanXSettings.DebugMode = false
+end
+
+RunService.RenderStepped:Connect(function()
+	if getgenv().YoxanXSettings and getgenv().YoxanXSettings.DebugMode then
+		local fps = math.floor(1 / RunService.RenderStepped:Wait())
+		local ping = getgenv().YoxanX_Perf and getgenv().YoxanX_Perf.Ping or 0
+		label.Text = "FPS: " .. fps .. " | Ping: " .. math.floor(ping)
+		label.Visible = true
+	end
+end)
+
+-- Cleanup on stop (optional)
+getgenv().YoxanX_Cleanup = function()
+	for _, gui in pairs(LocalPlayer.PlayerGui:GetChildren()) do
+		if gui.Name:find("YoxanX_") then
+			gui:Destroy()
+		end
+	end
+	getgenv().YoxanX_Target = nil
+	getgenv().YoxanX_Kills = 0
+end
