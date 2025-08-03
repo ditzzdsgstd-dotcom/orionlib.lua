@@ -1,6 +1,3 @@
--- YoxanXHub | Hypershot Gunfight V2.5+ (1/25 - Reworked Core Init & Tabs)
--- OrionLib: https://github.com/1nig1htmare1234/SCRIPTS/blob/main/Orion.lua
-
 repeat wait() until game:IsLoaded()
 local success, OrionLib = pcall(function()
     return loadstring(game:HttpGet("https://raw.githubusercontent.com/1nig1htmare1234/SCRIPTS/main/Orion.lua"))()
