@@ -1,397 +1,437 @@
--- YoxanXHub | Hypershot Gunfight - Silent Aim V3+ (Part 1/5)
--- OrionLib UI Setup (Mobile Friendly)
+-- YoxanXHub V3.5 - Part 1/5 (UI Full Setup) [Mobile Paste OK]
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/1nig1htmare1234/SCRIPTS/main/Orion.lua"))()
 local Window = OrionLib:MakeWindow({
-	Name = "YoxanXHub | Hypershot Gunfight V3+",
+	Name = "YoxanXHub | Hypershot Gunfight V3.5",
 	HidePremium = false,
 	SaveConfig = false,
 	IntroEnabled = true,
-	IntroText = "YoxanXHub V3+ Loaded"
+	IntroText = "YoxanXHub V3.5 Loaded"
 })
 
--- Core Settings Table
 getgenv().YoxanXSettings = {
-	Enabled = true,
-	HeadshotOnly = true,
-	AutoFire = true,
-	Prediction = true,
-	SmartWait = 0.05,
-	IgnoreDowned = true,
-	InvisibleBypass = true,
-	Wallbang = true,
-	AntiOverkill = true,
-
-	-- Toggle via UI
-	TeamCheck = false,
+	Enabled = false,
+	HeadshotOnly = false,
+	StickyLock = false,
+	IgnoreShielded = false,
 	VisibleOnly = true,
 	MaxDistance = true,
-	StickyLock = true,
-	MultiTarget = false,
-	HPFilter = true,
-	FallbackHitPart = true,
-	ESPEnabled = true,
-	DebugInfo = true,
-	CrosshairLockIcon = true,
-	NameESPColor = true,
-	TargetFreezeBypass = true,
-	HitmarkerEffect = true,
-	AutoPingAdjust = true,
 	WallCheck = true,
-	AntiPartShield = true,
-	AutoLeaveOnMod = false
+	SmartWait = 0.05,
+	ESPEnabled = true,
+	HitEffect = true,
+	HitText = true,
+	AntiRecoil = true,
+
+	-- Auto ON
+	AutoFire = true,
+	Prediction = true,
+	IgnoreDowned = true,
+	InvisibleBypass = true,
+	AutoPingAdjust = true,
+	AntiOverkill = true,
+	Wallbang = true,
+	MultiTarget = true,
+	CrosshairIcon = true,
+	FreezeBypass = true,
+	SilentMode = true,
+	ModLeave = true
 }
 
--- Main Tab
-local Main = Window:MakeTab({
+local Tab = Window:MakeTab({
 	Name = "Silent Aim",
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
 })
 
-Main:AddToggle({Name = "Enable Silent Aim", Default = true, Callback = function(v) YoxanXSettings.Enabled = v end})
-Main:AddToggle({Name = "Headshot Only", Default = true, Callback = function(v) YoxanXSettings.HeadshotOnly = v end})
-Main:AddToggle({Name = "Auto Fire", Default = true, Callback = function(v) YoxanXSettings.AutoFire = v end})
-Main:AddToggle({Name = "Visible Only Target", Default = true, Callback = function(v) YoxanXSettings.VisibleOnly = v end})
-Main:AddToggle({Name = "Max Distance Limit (500)", Default = true, Callback = function(v) YoxanXSettings.MaxDistance = v end})
-Main:AddToggle({Name = "Sticky Lock-On", Default = true, Callback = function(v) YoxanXSettings.StickyLock = v end})
-Main:AddToggle({Name = "Multi Target Mode", Default = false, Callback = function(v) YoxanXSettings.MultiTarget = v end})
-Main:AddToggle({Name = "Ignore Dead / Downed", Default = true, Callback = function(v) YoxanXSettings.IgnoreDowned = v end})
-Main:AddToggle({Name = "Target HP Filter (>10)", Default = true, Callback = function(v) YoxanXSettings.HPFilter = v end})
-Main:AddToggle({Name = "Fallback HitPart", Default = true, Callback = function(v) YoxanXSettings.FallbackHitPart = v end})
-Main:AddToggle({Name = "Target Freeze Bypass", Default = true, Callback = function(v) YoxanXSettings.TargetFreezeBypass = v end})
-Main:AddToggle({Name = "Anti Part Shield (Forcefields)", Default = true, Callback = function(v) YoxanXSettings.AntiPartShield = v end})
-Main:AddToggle({Name = "Auto Leave on Mod Join", Default = false, Callback = function(v) YoxanXSettings.AutoLeaveOnMod = v end})
-
--- Visual Tab
-local Visual = Window:MakeTab({
-	Name = "Visuals",
-	Icon = "rbxassetid://6034509993",
-	PremiumOnly = false
+Tab:AddToggle({
+	Name = "Enable Silent Aim",
+	Default = false,
+	Callback = function(val)
+		YoxanXSettings.Enabled = val
+	end
 })
 
-Visual:AddToggle({Name = "Enable ESP", Default = true, Callback = function(v) YoxanXSettings.ESPEnabled = v end})
-Visual:AddToggle({Name = "Name ESP by Team Color", Default = true, Callback = function(v) YoxanXSettings.NameESPColor = v end})
-Visual:AddToggle({Name = "Crosshair Lock Icon", Default = true, Callback = function(v) YoxanXSettings.CrosshairLockIcon = v end})
-Visual:AddToggle({Name = "Hitmarker Effect", Default = true, Callback = function(v) YoxanXSettings.HitmarkerEffect = v end})
-Visual:AddToggle({Name = "Debug Info / FPS", Default = true, Callback = function(v) YoxanXSettings.DebugInfo = v end})
-
--- Advanced Tab
-local Adv = Window:MakeTab({
-	Name = "Advanced",
-	Icon = "rbxassetid://6031280882",
-	PremiumOnly = false
+Tab:AddToggle({
+	Name = "Headshot Only",
+	Default = false,
+	Callback = function(val)
+		YoxanXSettings.HeadshotOnly = val
+	end
 })
 
-Adv:AddToggle({Name = "Prediction", Default = true, Callback = function(v) YoxanXSettings.Prediction = v end})
-Adv:AddToggle({Name = "Auto Ping Adjuster", Default = true, Callback = function(v) YoxanXSettings.AutoPingAdjust = v end})
-Adv:AddToggle({Name = "WallCheck 3D Raycast", Default = true, Callback = function(v) YoxanXSettings.WallCheck = v end})
-Adv:AddToggle({Name = "Wallbang (Auto Fire Through Wall)", Default = true, Callback = function(v) YoxanXSettings.Wallbang = v end})
-Adv:AddToggle({Name = "Invisible Target Bypass", Default = true, Callback = function(v) YoxanXSettings.InvisibleBypass = v end})
-Adv:AddToggle({Name = "Anti Overkill", Default = true, Callback = function(v) YoxanXSettings.AntiOverkill = v end})
-Adv:AddSlider({
-	Name = "Smart Wait Delay",
+Tab:AddToggle({
+	Name = "Sticky Lock-On",
+	Default = false,
+	Callback = function(val)
+		YoxanXSettings.StickyLock = val
+	end
+})
+
+Tab:AddToggle({
+	Name = "Ignore Shielded Players",
+	Default = false,
+	Callback = function(val)
+		YoxanXSettings.IgnoreShielded = val
+	end
+})
+
+Tab:AddToggle({
+	Name = "Visible Only Targets",
+	Default = true,
+	Callback = function(val)
+		YoxanXSettings.VisibleOnly = val
+	end
+})
+
+Tab:AddToggle({
+	Name = "Max Distance Limit (500 Studs)",
+	Default = true,
+	Callback = function(val)
+		YoxanXSettings.MaxDistance = val
+	end
+})
+
+Tab:AddToggle({
+	Name = "WallCheck 3D (Raycast)",
+	Default = true,
+	Callback = function(val)
+		YoxanXSettings.WallCheck = val
+	end
+})
+
+Tab:AddSlider({
+	Name = "Smart Delay Between Shots",
 	Min = 0.02,
 	Max = 0.15,
 	Default = 0.05,
 	Increment = 0.01,
 	ValueName = "s",
-	Callback = function(v)
-		YoxanXSettings.SmartWait = v
+	Callback = function(val)
+		YoxanXSettings.SmartWait = val
 	end
 })
 
--- YoxanXHub | Silent Aim V3+ (Part 2/5) - Target Priority & Multi Target
+local VisualTab = Window:MakeTab({
+	Name = "Visuals",
+	Icon = "rbxassetid://6034509993",
+	PremiumOnly = false
+})
+
+VisualTab:AddToggle({
+	Name = "Enable ESP (Team Color)",
+	Default = true,
+	Callback = function(val)
+		YoxanXSettings.ESPEnabled = val
+	end
+})
+
+VisualTab:AddToggle({
+	Name = "Bullet Flash Effect",
+	Default = true,
+	Callback = function(val)
+		YoxanXSettings.HitEffect = val
+	end
+})
+
+VisualTab:AddToggle({
+	Name = "Hitmarker Text (Bottom Screen)",
+	Default = true,
+	Callback = function(val)
+		YoxanXSettings.HitText = val
+	end
+})
+
+VisualTab:AddToggle({
+	Name = "Anti Recoil Compensation",
+	Default = true,
+	Callback = function(val)
+		YoxanXSettings.AntiRecoil = val
+	end
+})
+
+-- YoxanXHub V3.5 - Part 2/5 (Targeting + Prediction Logic)
 local Players = game:GetService("Players")
-local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
-local Settings = getgenv().YoxanXSettings or {}
-getgenv().YoxanX_Targets = {}
-
-local function isValidTarget(player)
-	if player == LocalPlayer or not player.Character then return false end
-	local char = player.Character
-	local head = char:FindFirstChild("Head")
-	local root = char:FindFirstChild("HumanoidRootPart")
-	local hum = char:FindFirstChild("Humanoid")
-	if not head or not root or not hum then return false end
-	if hum.Health <= 0 then return false end
-	if Settings.TeamCheck and player.Team == LocalPlayer.Team then return false end
-	if Settings.HPFilter and hum.Health < 10 then return false end
-	if Settings.AntiPartShield and (char:FindFirstChild("ForceField") or char:FindFirstChildWhichIsA("ForceField")) then return false end
-	if not Camera:WorldToViewportPoint(head.Position).Z > 0 then return false end
-	if Settings.MaxDistance and (Camera.CFrame.Position - head.Position).Magnitude > 500 then return false end
-	return true
+local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local function IsVisible(part)
+	if not part then return false end
+	local rayParams = RaycastParams.new()
+	rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+	rayParams.FilterDescendantsInstances = {LocalPlayer.Character, Camera}
+	local ray = workspace:Raycast(Camera.CFrame.Position, (part.Position - Camera.CFrame.Position).Unit * 1000, rayParams)
+	return ray == nil or ray.Instance:IsDescendantOf(part.Parent)
 end
-
-local function getTargetList()
-	local result = {}
-	for _, player in ipairs(Players:GetPlayers()) do
-		if isValidTarget(player) then
-			table.insert(result, player)
+local function IsShielded(char)
+	return char:FindFirstChild("ForceField") or char:FindFirstChild("Shield") or char:FindFirstChild("Bubble")
+end
+local function IsDowned(char)
+	local humanoid = char:FindFirstChildOfClass("Humanoid")
+	return humanoid and humanoid.Health <= 0
+end
+local function PredictPosition(part, velocity, distance)
+	local ping = tonumber(string.match(game:Stats():GetTotalMemoryUsageMb(), "%d+")) or 50
+	local speed = 200
+	if YoxanXSettings.AutoPingAdjust then
+		speed = speed - math.clamp(ping, 0, 200) * 0.3
+	end
+	local travelTime = distance / speed
+	return part.Position + (velocity * travelTime)
+end
+function GetValidTargets()
+	local list = {}
+	for _, player in pairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+			if YoxanXSettings.IgnoreShielded and IsShielded(player.Character) then continue end
+			if YoxanXSettings.IgnoreDowned and IsDowned(player.Character) then continue end
+			local head = player.Character.Head
+			if YoxanXSettings.VisibleOnly and not IsVisible(head) then continue end
+			if YoxanXSettings.MaxDistance and (head.Position - Camera.CFrame.Position).Magnitude > 500 then continue end
+			table.insert(list, player)
 		end
 	end
-	return result
+	return list
 end
-
-local function getClosestTarget()
-	local closest, closestDist = nil, math.huge
-	for _, player in ipairs(Players:GetPlayers()) do
-		if isValidTarget(player) then
-			local head = player.Character.Head
-			local screenPos, visible = Camera:WorldToViewportPoint(head.Position)
-			if not visible and Settings.VisibleOnly then continue end
-			local dist = (Camera.CFrame.Position - head.Position).Magnitude
-			if dist < closestDist then
-				closest = player
-				closestDist = dist
+function LockClosestTarget()
+	local shortestDist = math.huge
+	local best = nil
+	for _, player in pairs(GetValidTargets()) do
+		local head = player.Character:FindFirstChild("Head")
+		if head then
+			local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
+			local dist = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)).Magnitude
+			if onScreen and dist < shortestDist then
+				shortestDist = dist
+				best = player
 			end
 		end
 	end
-	return closest
+	return best
 end
-
--- Main Lock Function
-local function updateTargets()
-	if Settings.MultiTarget then
-		getgenv().YoxanX_Targets = getTargetList()
-	else
-		local single = getClosestTarget()
-		getgenv().YoxanX_Targets = single and {single} or {}
+getgenv().YoxanX_Target = nil
+RunService.RenderStepped:Connect(function()
+	if not YoxanXSettings.Enabled then return end
+	local t = getgenv().YoxanX_Target
+	if not t or not t.Character or not t.Character:FindFirstChild("Head") then
+		local newT = LockClosestTarget()
+		if newT then getgenv().YoxanX_Target = newT end
+	elseif not YoxanXSettings.StickyLock then
+		getgenv().YoxanX_Target = nil
 	end
-end
-
--- Auto Refresh Targets
-game:GetService("RunService").RenderStepped:Connect(function()
-	if not Settings.Enabled then return end
-	updateTargets()
 end)
 
--- YoxanXHub | Silent Aim V3+ (Part 3/5) - Fire Logic & Prediction
-local RunService = game:GetService("RunService")
+-- YoxanXHub V3.5 - Part 3/5 (Auto Fire, Aimbot, Bullet, Recoil)
 local Camera = workspace.CurrentCamera
-local Settings = getgenv().YoxanXSettings or {}
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local Mouse = game.Players.LocalPlayer:GetMouse()
+local LastShot = tick()
 
--- Helper: Get Head Position with Prediction
-local function predictTarget(target)
+function SmartFire(target)
+	if not target or not target.Character then return end
 	local char = target.Character
-	local head = char and char:FindFirstChild("Head")
-	local hrp = char and char:FindFirstChild("HumanoidRootPart")
-	if not head or not hrp then return nil end
+	local head = char:FindFirstChild("Head")
+	local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+	local aimPart = (YoxanXSettings.HeadshotOnly and head) or torso or head
+	if not aimPart then return end
+	local dist = (Camera.CFrame.Position - aimPart.Position).Magnitude
+	local predicted = YoxanXSettings.Prediction and PredictPosition(aimPart, aimPart.Velocity, dist) or aimPart.Position
 
-	local velocity = hrp.Velocity
-	local distance = (Camera.CFrame.Position - head.Position).Magnitude
-	local pingAdjust = Settings.AutoPingAdjust and (game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue() / 1000) or 0
-	local time = distance / 200 -- bullet speed assumed 200
-	local predicted = head.Position + (velocity * (Settings.Prediction and (time + pingAdjust) or 0))
-	return predicted
-end
-
--- Helper: Raycast WallCheck
-local function canHit(position)
-	if not Settings.WallCheck then return true end
-	local rayParams = RaycastParams.new()
-	rayParams.FilterType = Enum.RaycastFilterType.Blacklist
-	rayParams.FilterDescendantsInstances = {LocalPlayer.Character}
-	local result = workspace:Raycast(Camera.CFrame.Position, (position - Camera.CFrame.Position).Unit * 1000, rayParams)
-	if not result then return true end
-	if result.Instance.Transparency >= 0.4 or result.Instance:IsA("Decal") or result.Instance.CanCollide == false then
-		return true
+	if YoxanXSettings.WallCheck then
+		local rayParams = RaycastParams.new()
+		rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+		rayParams.FilterDescendantsInstances = {Camera, game.Players.LocalPlayer.Character}
+		local result = workspace:Raycast(Camera.CFrame.Position, (predicted - Camera.CFrame.Position).Unit * dist, rayParams)
+		if result and not result.Instance:IsDescendantOf(char) then return end
 	end
-	return Settings.Wallbang
-end
 
--- Fire Simulation (for supported games)
-local function fireAt(position)
-	local tool = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool")
-	if not tool then return end
-	local fireEvent = tool:FindFirstChildWhichIsA("RemoteEvent") or tool:FindFirstChildWhichIsA("RemoteFunction")
-	if fireEvent then
-		pcall(function()
-			fireEvent:FireServer(position)
-		end)
+	if tick() - LastShot < YoxanXSettings.SmartWait then return end
+	LastShot = tick()
+
+	-- Recoil Compensation
+	if YoxanXSettings.AntiRecoil then
+		Camera.CFrame = CFrame.new(Camera.CFrame.Position, predicted)
 	end
-end
 
--- Main Fire Logic
-RunService.Heartbeat:Connect(function()
-	if not Settings.Enabled or not Settings.AutoFire then return end
-	for _, target in ipairs(getgenv().YoxanX_Targets) do
-		local char = target.Character
-		if not char or not char:FindFirstChild("Humanoid") or char.Humanoid.Health <= 0 then continue end
-		if Settings.IgnoreDowned and char:FindFirstChild("Downed") then continue end
-		if Settings.InvisibleBypass == false and not char:FindFirstChild("Head"):IsDescendantOf(workspace) then continue end
+	-- Silent Fire Simulation
+	mouse1click()
 
-		local predicted = predictTarget(target)
-		if predicted and canHit(predicted) then
-			fireAt(predicted)
-			if not Settings.MultiTarget then break end
-			wait(Settings.SmartWait or 0.05)
+	-- Bullet Flash
+	if YoxanXSettings.HitEffect then
+		local fx = Instance.new("Part")
+		fx.Anchored = true
+		fx.CanCollide = false
+		fx.Material = Enum.Material.Neon
+		fx.Size = Vector3.new(0.2, 0.2, 0.2)
+		fx.BrickColor = BrickColor.new("Bright red")
+		fx.CFrame = CFrame.new(aimPart.Position)
+		fx.Parent = workspace
+		game.Debris:AddItem(fx, 0.15)
+	end
+
+	-- Hitmarker Text
+	if YoxanXSettings.HitText then
+		local gui = Instance.new("BillboardGui", Camera)
+		gui.Size = UDim2.new(0, 100, 0, 40)
+		gui.StudsOffset = Vector3.new(0, 2, 0)
+		gui.Adornee = aimPart
+		gui.AlwaysOnTop = true
+		local label = Instance.new("TextLabel", gui)
+		label.Size = UDim2.new(1, 0, 1, 0)
+		label.BackgroundTransparency = 1
+		label.Text = "HIT"
+		label.TextColor3 = Color3.new(1, 0, 0)
+		label.TextStrokeTransparency = 0
+		label.TextScaled = true
+		game.Debris:AddItem(gui, 0.4)
+	end
+
+	-- SilentMode (disable shot sound)
+	if YoxanXSettings.SilentMode and char:FindFirstChildOfClass("Humanoid") then
+		for _, sfx in pairs(char:GetDescendants()) do
+			if sfx:IsA("Sound") and sfx.IsPlaying then
+				sfx.Volume = 0
+			end
 		end
 	end
+end
+
+RunService.RenderStepped:Connect(function()
+	if not YoxanXSettings.Enabled then return end
+	if not YoxanXSettings.AutoFire then return end
+	local target = getgenv().YoxanX_Target
+	if target then SmartFire(target) end
 end)
 
--- YoxanXHub | Silent Aim V3+ (Part 4/5) - Visuals & Priority
-local Camera = workspace.CurrentCamera
-local RunService = game:GetService("RunService")
-local Settings = getgenv().YoxanXSettings or {}
+-- YoxanXHub V3.5 - Part 4/5 (ESP, Crosshair, Name Color, Hit FX)
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
-local function teamColor(player)
-	if player.Team and player.Team.TeamColor then
-		return player.Team.TeamColor.Color
+local function GetTeamColor(player)
+	if player.Team and player.TeamColor then
+		return player.TeamColor.Color
 	end
 	return Color3.new(1, 1, 1)
 end
 
--- ESP Name Color + Hitmarker
-local function showHitmarker(text)
-	if not Settings.HitmarkerEffect then return end
-	local gui = Instance.new("BillboardGui", Camera)
-	gui.Adornee = nil
-	gui.Size = UDim2.new(0, 200, 0, 50)
-	gui.StudsOffset = Vector3.new(0, 0, -2)
-	gui.AlwaysOnTop = true
-	gui.LightInfluence = 0
+local ESPFolder = Instance.new("Folder", game.CoreGui)
+ESPFolder.Name = "YoxanX_ESP"
 
-	local label = Instance.new("TextLabel", gui)
-	label.Size = UDim2.new(1, 0, 1, 0)
-	label.BackgroundTransparency = 1
-	label.Text = text or "HIT"
-	label.TextColor3 = Color3.new(1, 0, 0)
-	label.TextStrokeTransparency = 0
-	label.Font = Enum.Font.SourceSansBold
-	label.TextScaled = true
-
-	game.Debris:AddItem(gui, 0.35)
-end
-
--- ESP Tags (simple for mobile)
-local function drawESP(player)
-	local char = player.Character
-	if not char then return end
-	local head = char:FindFirstChild("Head")
-	if not head then return end
-	local tag = head:FindFirstChild("YoxanX_Tag")
-	if tag then tag:Destroy() end
-
-	local billboard = Instance.new("BillboardGui", head)
-	billboard.Name = "YoxanX_Tag"
-	billboard.Size = UDim2.new(0, 100, 0, 20)
-	billboard.Adornee = head
-	billboard.AlwaysOnTop = true
-
-	local text = Instance.new("TextLabel", billboard)
-	text.Size = UDim2.new(1, 0, 1, 0)
-	text.Text = player.Name
-	text.BackgroundTransparency = 1
-	text.TextScaled = true
-	text.Font = Enum.Font.GothamBold
-	text.TextColor3 = Settings.NameESPColor and teamColor(player) or Color3.new(1, 1, 1)
-
-	game.Debris:AddItem(billboard, 2)
-end
-
--- Target Sorting (by distance or HP)
-local function sortTargets(targets)
-	table.sort(targets, function(a, b)
-		local charA, charB = a.Character, b.Character
-		if not charA or not charB then return false end
-		local hpA = charA:FindFirstChild("Humanoid") and charA.Humanoid.Health or 0
-		local hpB = charB:FindFirstChild("Humanoid") and charB.Humanoid.Health or 0
-		local distA = (Camera.CFrame.Position - charA.Head.Position).Magnitude
-		local distB = (Camera.CFrame.Position - charB.Head.Position).Magnitude
-		return (hpA < hpB) or (distA < distB)
-	end)
-	return targets
-end
-
--- Auto Retarget if Dead
-local function cleanupAndRetarget()
-	local cleaned = {}
-	for _, target in ipairs(getgenv().YoxanX_Targets) do
-		local char = target.Character
-		if char and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
-			table.insert(cleaned, target)
-		end
+function ClearESP()
+	for _, obj in ipairs(ESPFolder:GetChildren()) do
+		obj:Destroy()
 	end
-	getgenv().YoxanX_Targets = sortTargets(cleaned)
 end
 
--- Main Display Handler
+function CreateESP(player)
+	if not player.Character or not player.Character:FindFirstChild("Head") then return end
+	local head = player.Character.Head
+	local tag = Instance.new("BillboardGui", ESPFolder)
+	tag.Adornee = head
+	tag.Size = UDim2.new(0, 100, 0, 30)
+	tag.StudsOffset = Vector3.new(0, 2, 0)
+	tag.AlwaysOnTop = true
+	local name = Instance.new("TextLabel", tag)
+	name.Size = UDim2.new(1, 0, 1, 0)
+	name.BackgroundTransparency = 1
+	name.Text = player.DisplayName or player.Name
+	name.TextColor3 = GetTeamColor(player)
+	name.TextStrokeTransparency = 0.5
+	name.TextScaled = true
+end
+
 RunService.RenderStepped:Connect(function()
-	if not Settings.ESPEnabled then return end
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-			drawESP(player)
+	if not YoxanXSettings.ESPEnabled then
+		ClearESP()
+		return
+	end
+	ClearESP()
+	for _, plr in pairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+			CreateESP(plr)
 		end
 	end
 end)
 
--- Retarget Monitor
-RunService.Heartbeat:Connect(function()
-	if Settings.Enabled then
-		cleanupAndRetarget()
+-- Crosshair Lock Icon
+local cross = Drawing.new("Text")
+cross.Text = "🎯"
+cross.Size = 32
+cross.Visible = false
+cross.Center = true
+cross.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+cross.Color = Color3.fromRGB(255, 50, 50)
+
+RunService.RenderStepped:Connect(function()
+	if not YoxanXSettings.CrosshairIcon then
+		cross.Visible = false
+		return
+	end
+	local tgt = getgenv().YoxanX_Target
+	if tgt and tgt.Character and tgt.Character:FindFirstChild("Head") then
+		cross.Visible = true
+	else
+		cross.Visible = false
 	end
 end)
 
--- YoxanXHub | Silent Aim V3+ (Part 5/5 FINAL) - Anti Mod, Spectator, Finishing
+-- YoxanXHub V3.5 - Part 5/5 (Optimizer, Mod Detector, Debug)
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local Settings = getgenv().YoxanXSettings or {}
-local RunService = game:GetService("RunService")
-local Mods = {"ADMIN", "MOD", "STAFF", "OWNER", "YT", "⚡"} -- Add more if needed
+local StarterGui = game:GetService("StarterGui")
+
+-- UI Debug FPS + Lock Status
+local screenGui = Instance.new("ScreenGui", game.CoreGui)
+screenGui.Name = "YoxanX_HUD"
+
+local infoFrame = Instance.new("TextLabel", screenGui)
+infoFrame.Size = UDim2.new(0, 250, 0, 40)
+infoFrame.Position = UDim2.new(0, 10, 0, 10)
+infoFrame.BackgroundTransparency = 0.4
+infoFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+infoFrame.TextColor3 = Color3.fromRGB(0, 255, 140)
+infoFrame.Font = Enum.Font.GothamBold
+infoFrame.TextScaled = true
+infoFrame.TextStrokeTransparency = 0.5
+infoFrame.Text = "YoxanXHub: Loading..."
+
+RunService.RenderStepped:Connect(function()
+	local fps = math.floor(1 / RunService.RenderStepped:Wait())
+	local target = getgenv().YoxanX_Target
+	local locked = (target and target.Name) or "None"
+	infoFrame.Text = "FPS: "..fps.." | Locked: "..locked
+end)
 
 -- Auto Leave on Mod Join
+local mods = {"Admin", "Mod", "STAFF", "Developer"}
 Players.PlayerAdded:Connect(function(player)
-	if not Settings.AutoLeaveOnMod then return end
-	for _, name in ipairs(Mods) do
-		if string.find(string.upper(player.Name), name) then
-			OrionLib:MakeNotification({
-				Name = "YoxanXHub Alert",
-				Content = "Moderator Detected! Leaving...",
-				Image = "rbxassetid://4483345998",
-				Time = 4
-			})
-			wait(2)
-			game:Shutdown()
-			return
+	for _, word in ipairs(mods) do
+		if string.find(string.lower(player.Name), string.lower(word)) then
+			if YoxanXSettings.ModLeave then
+				StarterGui:SetCore("SendNotification", {
+					Title = "YoxanXHub Alert",
+					Text = "Moderator Detected. Leaving...",
+					Duration = 4
+				})
+				wait(2)
+				game:Shutdown()
+			end
 		end
 	end
 end)
 
--- Spectator Detection (basic alert)
-RunService.RenderStepped:Connect(function()
-	if not Settings.DebugInfo then return end
-	local spectators = 0
-	for _, p in pairs(Players:GetPlayers()) do
-		if p ~= LocalPlayer and not p.Character then
-			spectators += 1
-		end
-	end
-	if spectators >= 1 then
-		OrionLib:MakeNotification({
-			Name = "YoxanXHub Notice",
-			Content = tostring(spectators) .. " people spectating you!",
-			Image = "rbxassetid://4483345998",
-			Time = 4
-		})
-	end
-end)
+-- Auto Clean Up
+game:GetService("CoreGui"):WaitForChild("Orion"):SetAttribute("YoxanX_Loaded", true)
+warn("YoxanXHub V3.5 Full Loaded")
 
--- Final Notification
-OrionLib:MakeNotification({
-	Name = "YoxanXHub V3+ Fully Loaded",
-	Content = "Silent Aim + ESP Ready",
-	Image = "rbxassetid://4483345998",
-	Time = 5
-})
+-- Part 5 Final Done
 
 OrionLib:MakeNotification({
-	Name = "YoxanXHub V3+ Loaded",
-	Content = "Ready to Use",
+	Name = "YoxanXHub V3.5 Ready",
+	Content = "Main UI Loaded. Toggles available!",
 	Image = "rbxassetid://4483345998",
 	Time = 5
 })
