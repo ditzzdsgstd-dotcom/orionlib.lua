@@ -7,10 +7,10 @@ if not success then
 end
 
 local Window = OrionLib:MakeWindow({
-    Name = "YoxanXHub V2.5+ | Hypershot Gunfight",
+    Name = "YoxanXHub V3 | Hypershot Gunfight",
     HidePremium = false,
     IntroEnabled = true,
-    IntroText = "YoxanXHub V2.5 Loading...",
+    IntroText = "YoxanXHub V3 Loading...",
     SaveConfig = true,
     ConfigFolder = "YoxanXHub"
 })
